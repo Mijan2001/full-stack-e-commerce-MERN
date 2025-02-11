@@ -20,8 +20,8 @@ const HeroSection = () => {
         });
     }, []);
     return (
-        <div className="mt-10">
-            <section className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="mt-10 w-full">
+            <section className="container  mx-auto  grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {cards.map(card => (
                     <div
                         key={card.id}

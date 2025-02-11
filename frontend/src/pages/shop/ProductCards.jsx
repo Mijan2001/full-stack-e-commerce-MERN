@@ -1,17 +1,28 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import RatingStars from './RatingStars';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../../redux/features/cart/CartSlice';
+import { toast } from 'react-toastify';
 
 const ProductCards = ({ products }) => {
+    const dispatch = useDispatch();
+    const handleAddToCart = product => {
+        toast.success('Item added to cart', {
+            position: 'top-right'
+        });
+        dispatch(addToCart(product));
+    };
+
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {products.map((product, index) => (
                 <div
                     key={index}
-                    className="bg-white  rounded-md shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform"
+                    className="bg-white   rounded-md shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform"
                 >
-                    <div to={`/shop/${product._id}`} className="block">
-                        <Link to={`/shop/${product._id}`}>
+                    <div className="block">
+                        <Link to={`/shop/${product.id}`}>
                             <img
                                 src={product.image}
                                 alt={product.name}
@@ -36,7 +47,13 @@ const ProductCards = ({ products }) => {
                         </div>
                     </div>
                     {/* cart icons ======================  */}
-                    <button className="absolute top-2 right-2 text-black px-3 py-1 rounded-md hover:bg-gray-200 hover:text-black transition-colors duration-300 cursor-pointer">
+                    <button
+                        onClick={e => {
+                            e.stopPropagation();
+                            handleAddToCart(product);
+                        }}
+                        className="absolute top-2 right-2 text-black px-3 py-1 rounded-md hover:bg-gray-200 hover:text-black transition-colors duration-300 cursor-pointer"
+                    >
                         <i className="ri-shopping-cart-2-line font-bold text-xl"></i>
                     </button>
                 </div>

@@ -1,8 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Link, NavLink } from 'react-router-dom';
 import 'remixicon/fonts/remixicon.css';
+import CartModal from '../pages/shop/CartModal';
+import { toast } from 'react-toastify';
 
 const Navbar = () => {
+    const products = useSelector(state => state.cart.products);
+    const [isCartOpen, setIsCartOpen] = useState(false);
+    const handleCartToggle = () => {
+        setIsCartOpen(!isCartOpen);
+    };
+
     return (
         <>
             <header className="bg-gray-950 text-white font-semibold">
@@ -69,23 +78,59 @@ const Navbar = () => {
                             to="/"
                             className="text-black dark:text-white hover:text-gray-300"
                         >
-                            Logo
+                            ECOMMERCE
                         </NavLink>
                     </div>
                     {/* nav icons for medium and large devices */}
                     <div className="hidden md:flex space-x-4 order-3">
-                        <Link to="/search">
-                            <i className="ri-search-line"></i>
-                        </Link>
-                        <button>
-                            <i className="ri-shopping-cart-2-line"></i>
-                            <sup>0</sup>
-                        </button>
-                        <Link to="/login">
-                            <i className="ri-user-line"></i>
-                        </Link>
+                        <span>
+                            <Link to="/search">
+                                <i className="ri-search-line"></i>
+                            </Link>
+                        </span>
+
+                        <span>
+                            <button
+                                className="cursor-pointer"
+                                onClick={() => {
+                                    products.length > 0
+                                        ? handleCartToggle()
+                                        : toast.error('Cart is empty', {
+                                              position: 'top-right',
+                                              autoClose: 1000,
+                                              hideProgressBar: false,
+                                              closeOnClick: true,
+                                              pauseOnHover: true,
+                                              draggable: true,
+                                              progress: undefined
+                                          });
+                                }}
+                            >
+                                <i className="ri-shopping-cart-2-line"></i>
+                                {products.length > 0 && (
+                                    <sup className="bg-amber-400 px-1  border-amber-50  text-black rounded-full ">
+                                        {products.length}
+                                    </sup>
+                                )}
+                            </button>
+                        </span>
+
+                        <span>
+                            <Link to="/login">
+                                <i className="ri-user-line"></i>
+                            </Link>
+                        </span>
                     </div>
                 </nav>
+
+                {/* cart dropdown======================== */}
+                {products && products.length > 0 && isCartOpen && (
+                    <CartModal
+                        products={products}
+                        isOpen={isCartOpen}
+                        onClose={handleCartToggle}
+                    />
+                )}
             </header>
         </>
     );

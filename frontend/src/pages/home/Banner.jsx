@@ -3,7 +3,7 @@ import bannerImg from '../../assets/header.png';
 
 const Banner = () => {
     return (
-        <div className="carousel-container max-h-[600px] px-4 py-5  md:px-10">
+        <div className="carousel-container max-h-[600px]  py-5  ">
             <div className="carousel-item flex flex-col md:flex-row items-center justify-between bg-gray-100 p-6 rounded-sm ">
                 <div className="text-center md:text-left md:w-1/2">
                     <h4 className="text-lg font-semibold text-gray-700">
