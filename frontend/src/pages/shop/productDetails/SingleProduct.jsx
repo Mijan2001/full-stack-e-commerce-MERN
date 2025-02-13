@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import ProductCards from '../ProductCards';
 import products from '../../../data/products.json';
 import RatingStars from '../RatingStars';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../../../redux/features/cart/CartSlice';
 import { toast } from 'react-toastify';
+import { useFetchProductByIdQuery } from '../../../redux/features/products/productsApi';
+import ReviewsCard from '../reviews/ReviewsCard';
 
 const SingleProduct = () => {
     const { id } = useParams();
-    console.log('id : ', id);
 
     const dispatch = useDispatch();
+    const { data, error, isLoading } = useFetchProductByIdQuery(id);
+    const product = data?.product || {};
+    const productReviews = product?.reviews || [];
+
     const handleAddToCart = product => {
         toast.success('Item added to cart', {
             position: 'top-right'
@@ -19,17 +23,29 @@ const SingleProduct = () => {
         dispatch(addToCart(product));
     };
 
-    const [filteredProducts, setFilteredProducts] = useState([]);
-    console.log('filteredProducts : ', filteredProducts);
-
-    useEffect(() => {
-        const productData = products.filter(
-            product => product.id === Number(id)
+    // loading product ==============================
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="animate-spin rounded-full h-32 w-32 border-t-4 border-b-4 border-blue-500"></div>
+                <p className="ml-4 text-xl font-semibold text-blue-500">
+                    Loading...
+                </p>
+            </div>
         );
-        setFilteredProducts(productData);
-    }, [id]);
+    }
 
-    const product = filteredProducts.length > 0 ? filteredProducts[0] : null;
+    // error fetching product=========================
+    if (error) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <p className="text-xl font-semibold text-red-500">
+                    Failed to fetch product
+                </p>
+            </div>
+        );
+    }
+
     return (
         <div className="mt-5 flex flex-col mx-auto items-center md:mx-auto w-full">
             <section className="w-full h-[280px] flex flex-col items-center justify-center bg-gray-100 mt-5 mx-2 md:mx-10">
@@ -47,7 +63,7 @@ const SingleProduct = () => {
                 </div>
             </section>
 
-            <section className="mt-5   w-full">
+            <section className="mt-5 w-full">
                 <div className="grid w-full h-full grid-cols-1  md:grid-cols-2 gap-5 items-start">
                     <div className="flex justify-center">
                         <img
@@ -79,6 +95,7 @@ const SingleProduct = () => {
                                     <strong className="text-lg mr-2">
                                         Rating:
                                     </strong>
+                                    {/* product rating========================== */}
                                     <RatingStars rating={product?.rating} />
                                     <span className="text-lg ml-2">
                                         ({product?.rating})
@@ -86,8 +103,12 @@ const SingleProduct = () => {
                                 </div>
                             </div>
                         </div>
+                        {/* add to cart button===========================  */}
                         <button
-                            onClick={() => handleAddToCart(filteredProducts[0])}
+                            onClick={e => {
+                                e.stopPropagation();
+                                handleAddToCart(product);
+                            }}
                             className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors duration-300 cursor-pointer"
                         >
                             Add to Cart
@@ -96,16 +117,8 @@ const SingleProduct = () => {
                 </div>
             </section>
 
-            <section className="w-full mt-5 mx-2 md:mx-10">
-                <h3 className="text-2xl font-semibold text-gray-800 mb-4">
-                    Reviews
-                </h3>
-                <div className="bg-white p-5 rounded-md shadow-lg">
-                    <p className="text-gray-500 text-base mb-4">
-                        No reviews yet.
-                    </p>
-                </div>
-            </section>
+            {/* review section================================  */}
+            <ReviewsCard productReviews={productReviews} />
         </div>
     );
 };

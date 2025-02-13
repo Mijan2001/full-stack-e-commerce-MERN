@@ -1,16 +1,103 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Link, NavLink } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import 'remixicon/fonts/remixicon.css';
 import CartModal from '../pages/shop/CartModal';
 import { toast } from 'react-toastify';
+import avatarImg from '../assets/avatar.png';
+import { logout } from '../redux/features/auth/authSlice';
+import { useLogoutUserMutation } from '../redux/features/auth/authApi';
 
 const Navbar = () => {
     const products = useSelector(state => state.cart.products);
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const navigate = useNavigate();
     const handleCartToggle = () => {
         setIsCartOpen(!isCartOpen);
     };
+
+    // show user if logged in ============================
+    const dispatch = useDispatch();
+    const { user } = useSelector(state => state?.auth);
+
+    // logout user========================
+    const [logoutUser] = useLogoutUserMutation();
+    const handleLogout = async () => {
+        try {
+            toast.success('Logged out successfully', {
+                position: 'top-right',
+                autoClose: 1000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined
+            });
+            await logoutUser().unwrap();
+
+            dispatch(logout());
+
+            navigate('/login');
+        } catch (error) {
+            console.log(error);
+            toast.error('Failed to logout', {
+                position: 'top-right',
+                autoClose: 1000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined
+            });
+        }
+    };
+
+    // dropdown menu========================
+    const [isDropDownOpen, setIsDropDownOpen] = useState(false);
+
+    const handleDropDownToggle = () => {
+        setIsDropDownOpen(!isDropDownOpen);
+    };
+
+    // admin dropdown menus========================
+    const adminDropdownMenus = () => [
+        { label: 'Dashboard', path: '/dashboard/admin' },
+        { label: 'Manage Items', path: '/dashboard/manage-products' },
+        { label: 'All Orders', path: '/dashboard/manage-orders' },
+        { label: 'Add New Post', path: '/dashboard/add-new-post' }
+    ];
+
+    // user dropdown menus============================
+    const userDropdownMenus = () => [
+        { label: 'Dashboard', path: '/dashboard' },
+        { label: 'Profile', path: '/dashboard/profile' },
+        { label: 'Payment', path: '/dashboard/payments' },
+        { label: 'Orders', path: '/dashboard/orders' }
+    ];
+
+    const dropdownMenus =
+        user?.user?.role === 'admin'
+            ? [...adminDropdownMenus()]
+            : [...userDropdownMenus()];
+
+    console.log('dropdownMenus : ', dropdownMenus);
+
+    // Close dropdown when clicking outside
+    const dropdownRef = useRef(null); // Reference for dropdown
+    useEffect(() => {
+        const handleClickOutside = event => {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target)
+            ) {
+                setIsDropDownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     return (
         <>
@@ -82,7 +169,7 @@ const Navbar = () => {
                         </NavLink>
                     </div>
                     {/* nav icons for medium and large devices */}
-                    <div className="hidden md:flex space-x-4 order-3">
+                    <div className="hidden md:flex justify-center items-center space-x-4 order-3">
                         <span>
                             <Link to="/search">
                                 <i className="ri-search-line"></i>
@@ -108,18 +195,66 @@ const Navbar = () => {
                             >
                                 <i className="ri-shopping-cart-2-line"></i>
                                 {products.length > 0 && (
-                                    <sup className="bg-amber-400 px-1  border-amber-50  text-black rounded-full ">
+                                    <sup className="bg-amber-400 px-1  text-black rounded-full ">
                                         {products.length}
                                     </sup>
                                 )}
                             </button>
                         </span>
 
-                        <span>
-                            <Link to="/login">
-                                <i className="ri-user-line"></i>
-                            </Link>
-                        </span>
+                        <header className="bg-gray-950 text-white font-semibold">
+                            <nav className="flex flex-col md:flex-row justify-between items-center">
+                                {/* Navigation items */}
+                                <div className="hidden md:flex space-x-4 order-3">
+                                    {user ? (
+                                        <div
+                                            className="relative"
+                                            ref={dropdownRef}
+                                        >
+                                            <img
+                                                onClick={handleDropDownToggle}
+                                                src={
+                                                    user?.profileImage ||
+                                                    avatarImg
+                                                }
+                                                alt="profile"
+                                                className="size-6 rounded-full cursor-pointer"
+                                            />
+                                            {isDropDownOpen && (
+                                                <div className="absolute  right-0 bg-gray-950 text-white w-40 shadow-md rounded-md p-2">
+                                                    {dropdownMenus.map(
+                                                        (menu, index) => (
+                                                            <Link
+                                                                onClick={() =>
+                                                                    setIsDropDownOpen(
+                                                                        false
+                                                                    )
+                                                                }
+                                                                key={index}
+                                                                to={menu.path}
+                                                                className="block py-1 px-2 hover:bg-gray-800"
+                                                            >
+                                                                {menu.label}
+                                                            </Link>
+                                                        )
+                                                    )}
+                                                    <button
+                                                        onClick={handleLogout}
+                                                        className="block py-1 px-2 hover:bg-gray-800"
+                                                    >
+                                                        Logout
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <Link to="/login">
+                                            <i className="ri-user-line"></i>
+                                        </Link>
+                                    )}
+                                </div>
+                            </nav>
+                        </header>
                     </div>
                 </nav>
 

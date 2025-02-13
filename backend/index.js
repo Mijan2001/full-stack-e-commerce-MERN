@@ -25,7 +25,11 @@ app.use(
 
 // routes ====================
 const authRoutes = require('./src/users/user.route');
+const productRoutes = require('./src/products/products.route');
+const reviewRoutes = require('./src/reviews/reviews.router');
 app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // connect to MongoDB================
 

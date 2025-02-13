@@ -22,7 +22,7 @@ const ProductCards = ({ products }) => {
                     className="bg-white   rounded-md shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform"
                 >
                     <div className="block">
-                        <Link to={`/shop/${product.id}`}>
+                        <Link to={`/shop/${product._id}`}>
                             <img
                                 src={product.image}
                                 alt={product.name}
