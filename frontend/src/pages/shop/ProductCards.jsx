@@ -6,6 +6,7 @@ import { addToCart } from '../../redux/features/cart/CartSlice';
 import { toast } from 'react-toastify';
 
 const ProductCards = ({ products }) => {
+    console.log('first product', products);
     const dispatch = useDispatch();
     const handleAddToCart = product => {
         toast.success('Item added to cart', {
@@ -22,7 +23,7 @@ const ProductCards = ({ products }) => {
                     className="bg-white   rounded-md shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform"
                 >
                     <div className="block">
-                        <Link to={`/shop/${product._id}`}>
+                        <Link to={`/shop/${product?._id}`}>
                             <img
                                 src={product.image}
                                 alt={product.name}
